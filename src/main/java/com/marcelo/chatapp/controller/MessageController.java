@@ -41,4 +41,11 @@ public class MessageController {
         return ResponseEntity.ok(messageResponseDto);
     }
 
+    @GetMapping("/getLastMessagesForChats")
+    public ResponseEntity<List<MessageDto>> getLastMessagesForChats(){
+        return ResponseEntity.ok(messageService.getLastMessagesForChats());
+    }
+
+
+
 }

@@ -1,6 +1,7 @@
 package com.marcelo.chatapp.controller;
 
 import com.marcelo.chatapp.dto.ChatDto;
+import com.marcelo.chatapp.dto.ChatDtoDetailed;
 import com.marcelo.chatapp.model.Chat;
 import com.marcelo.chatapp.service.ChatService;
 import lombok.AllArgsConstructor;
@@ -43,4 +44,20 @@ public class ChatController {
     public ResponseEntity<List<ChatDto>>getAllChatsForCurrentUser(){
         return ResponseEntity.ok(chatService.getAllChatsForCurrentUser());
     }
+
+    @GetMapping("/getAllChatsForCurrentUserDetailed")
+    public ResponseEntity<List<ChatDtoDetailed>>getAllChatsForCurrentUserDetailed(){
+        return ResponseEntity.ok(chatService.getAllChatsForCurrentUserDetailed());
+    }
+
+    @GetMapping("/getChatDetails/{chatId}")
+    public ResponseEntity<ChatDto> getChatDetails(@PathVariable Long chatId){
+        return ResponseEntity.ok(chatService.getChatDetails(chatId));
+    }
+
+    @GetMapping("/getChatDetailsWithParticipantsData/{chatId}")
+    public ResponseEntity<ChatDtoDetailed> getChatDetailsWithParticipantsData(@PathVariable Long chatId){
+        return ResponseEntity.ok(chatService.getChatDetailsWithParticipantsData(chatId));
+    }
+
 }

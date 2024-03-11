@@ -14,10 +14,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,9 +28,8 @@ public class MessageService {
 
     @Transactional
     public MessageDto sendMessage(MessageDto messageDto) {
-        List<AppUser> participants = userRepository.findAllByIdIn(messageDto.getRecipientIds());
+        List<AppUser> recipients = userRepository.findAllByIdIn(messageDto.getRecipientIds());
         AppUser currentUser = authService.getCurrentUser();
-        participants.add(currentUser);
         Chat chat;
 
         if (messageDto.getChatId() != null) {
@@ -49,8 +45,11 @@ public class MessageService {
             chat.setName(currentUser.getUsername() + " - " + formattedDate);
             chat.setType(ChatType.PRIVATE);
             chat.setCreated(new Date());
-
+            List<AppUser> participants = new ArrayList<>(recipients);
+            participants.add(currentUser);
+            System.out.println("participants" + participants);
             chat.setParticipants(participants);
+            chat.setChatOwnerId(currentUser.getId());
             chat = chatRepository.save(chat);
 
             for (AppUser participant : participants) {
@@ -62,10 +61,6 @@ public class MessageService {
         Message savedMessage = messageRepository.save(
                 messageMapper.map(messageDto, chat, currentUser)
         );
-        // exclude current user from participants
-        List<AppUser> recipients = participants.stream()
-                .filter(user -> user.getId().equals(currentUser.getId()))
-                .collect(Collectors.toList());
         savedMessage.setRecipients(recipients);
         messageRepository.save(savedMessage);
         return messageMapper.mapToDto(savedMessage);
@@ -79,7 +74,7 @@ public class MessageService {
     }
 
     public List<MessageDto> getAllMessagesByChatId(Long chatId){
-        List<Message> messages = messageRepository.findAllByChatIdOrderByCreatedDesc(chatId);
+        List<Message> messages = messageRepository.findAllByChatIdOrderByCreatedAsc(chatId);
         return messageMapper.mapToDtoList(messages);
     }
     public MessageDto editMessage(MessageDto messageDto){
@@ -88,5 +83,16 @@ public class MessageService {
         message.setContent(messageDto.getContent());
         messageRepository.save(message);
         return messageMapper.mapToDto(message);
+    }
+
+    public List<MessageDto> getLastMessagesForChats(){
+        List<Chat> chats = chatRepository.findAllByUserId(authService.getCurrentUser().getId());
+        List<Message> messages = new ArrayList<>();
+        for(Chat chat : chats){
+            Message message = messageRepository.findTopByChatIdOrderByCreatedDesc(chat.getId())
+                    .orElseThrow(() -> new SpringChatException("Last message for chat with id " + chat.getId() + " not found"));
+            messages.add(message);
+        }
+        return messageMapper.mapToDtoList(messages);
     }
 }

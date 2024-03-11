@@ -23,5 +23,6 @@ public class Chat {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private List<AppUser> participants;
+    private Long chatOwnerId;
     private Date created;
 }

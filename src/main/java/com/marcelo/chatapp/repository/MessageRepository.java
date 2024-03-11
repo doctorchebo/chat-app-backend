@@ -14,5 +14,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     Optional<Message> findById(Long id);
     List<Message> findBySender(AppUser sender);
     @EntityGraph(attributePaths = "recipients")
-    List<Message> findAllByChatIdOrderByCreatedDesc(Long id);
+    List<Message> findAllByChatIdOrderByCreatedAsc(Long id);
+    @EntityGraph(attributePaths = "recipients")
+    Optional<Message> findTopByChatIdOrderByCreatedDesc(Long chatId);
 }

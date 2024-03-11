@@ -15,6 +15,6 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     Optional<Chat> findById(Long Id);
     Optional<Chat> findByName(String name);
     @EntityGraph(attributePaths = "participants")
-    @Query("SELECT c FROM Chat c JOIN c.participants p WHERE p.id = :userId")
-    List<Chat> findAllChatsByUserId(@Param("userId") Long userId);
+    @Query("SELECT c FROM Chat c WHERE c.id IN (SELECT chat.id FROM Chat chat JOIN chat.participants participant WHERE participant.id = :userId)")
+    List<Chat> findAllByUserId(@Param("userId") Long userId);
 }
